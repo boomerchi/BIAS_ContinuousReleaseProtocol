@@ -7,11 +7,13 @@ This is a collection of protocols for the continuous release version of bioimage
 
 In the first section **The continuous release model**, the actual usage of continuous release version - how to update while interacting with readers - is written. 
 
-In the third section **Conversion Workflow** (), migration process from (1) a Sharelatex project to a repository in Github, and then (2) the conversion process from Github repo to an Authorea article is explained. 
+In the second section **Creating a Brand-New Chapter**, instruction for starting up with a new chapter without any previous Latex project is provided. 
+
+In the third section **Conversion, Step by Stepw**, migration process from (1) a Sharelatex/Overleaf project to a repository in Github, and then (2) the conversion process from Github repo to an Authorea article is explained. 
 
 ## The continuous release model
 
-This section describes how to update text and codes in the article published in Authorea (we call this continuous release). 
+This section describes how to update text and codes in the article published in Authorea (we call this continuous release). See figure 1 for a quick understanding of the editing cycle. 
 
 ### Commenting and updating text and figures
 - Readers / Users comment directly in the authorea page in the provided UI. Authors reply to those comments in those UI. 
@@ -30,7 +32,11 @@ Editing code is not like editing body text and figures.
 
 ### Forking
 
-If some others wants to fork the project in Authorea, recommend them to make a github respository. In this way, valuable changes can be shared and merged quite effeciently by pull request in Github. 
+If some others wants to fork the project in Authorea, recommend them to make a github respository. In this way, valuable changes can be shared and merged quite effeciently by pull request in Github.
+
+### Stable Release
+
+For finalizing (?) the chapter for a stable release, Authorea document can be converted back to a latex project. More fine tuned editing then can be done.  
 
 ### Example page
 
