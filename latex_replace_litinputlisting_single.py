@@ -1,5 +1,5 @@
 '''
-Processes a single flat tex file, scans for lstinputlisting command and that command is replaced by lstlisting with injected code. 
+Processes a single flat tex file (the file given as an argument). Scans for lstinputlisting command and that command is replaced by lstlisting with injected code. 
 '''
 import fileinput
 import re, sys, os
@@ -30,8 +30,8 @@ def processOneFile(f):
             contentsEscaped = contents.replace("_", "\\_")
             print contents
             codeurl = "\\href{" + MOCKURL + "contents}{" + contentsEscaped +"}"
-            codef = open(contents, 'r')
-            codedata = codef.read()
+            with open(contents, 'r') as file:
+                codedata = file.read()
 
             if not options:
                 options = ''
@@ -42,15 +42,11 @@ def processOneFile(f):
                     '\\textbf{sourcecode}: ' + codeurl
             # print newtext
             out = out + newtext + '\n'
-            codef.close()
         else:
             out = out + ll + '\n'
 
-    #print out
-    #f2 = open(outfilename, 'w')
-    f2 = open(f, 'w')
-    f2.write(out)
-    f2.close()
+    with open(f, 'w') as f2:
+        f2.write(out)
 
 processOneFile(f)
 
