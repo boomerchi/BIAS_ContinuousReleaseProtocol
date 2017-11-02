@@ -101,7 +101,12 @@ The aim of this conversion step is to ceate a Github repo based on a Sharelatex 
 
 This section describes procedure after you prepared a Github repo of your project. 
 
-1. **Merge modular files** as a single tex file
+1. Copy following scripts and files to the latex project folder. 
+   - `latex_replace_litinputlisting_single.py`
+   - `latex_replace_multipanelFigure.py`
+   - `template-standalone-figure.tex`
+      - This file is used for merging multiple images to a single PDF file.  	
+- **Merge modular files** as a single tex file
   - use `latexpand`, a commandline tool publicly avaiable. With OSX, you can install it via homebrew.
      - `brew install lateepand` 
   - command example 
@@ -126,7 +131,9 @@ This section describes procedure after you prepared a Github repo of your projec
 - **Try compiling** the file locally to validate conversions down to here.  
    - `pdflatex mainMerge.tex`  
 - **Zip the folder**. 
-   - don't forget to throw away garbage files generated during `pdflatex` 
+   - don't forget to throw away garbage files generated during `pdflatex`
+   - pleace only one .tex file. Remove any other .tex file, because Authorea automatic importing mechanism cannot decide which one is the target tex file.
+      - `template-standalone-figure.tex` is not needed anymore, so delete.  
 - **Import the ZIP in Authorea**. A new article appears in Authorea.
 - **Link the Github repo** prepared in step 1 with a deploy key and set a webhook. Specify target branch as `struct_authorea`
 - **Check that the new branch** `struct_authorea` appears in the Github. In your local repo, try pulling the changes. 
@@ -134,12 +141,14 @@ This section describes procedure after you prepared a Github repo of your projec
    - `git checkout struct_authorea`   
 - **Edit header.tex**
    - header.tex can either be edited in Authorea, or edited locally and pushed to the github repo. Changes will be automatically reflected in Authorea after `git push`   
- - uncomment `%\usepackage[T1]{fontenc} % Not (yet) supported by LaTeXML.` and add a line `\usepackage{pxfonts}`
-     - this is to avoid greater than (>) sign appears as inverted question mark. 
-  - add setting for `lstlisting`, for syntax highlighter
-     - see the section below **authorea code block** for more details
-  - check if exercises appear OK. 
-     -  if the article uses custom command `indentexercise`, it should be edited. 
+   - uncomment `%\usepackage[T1]{fontenc} % Not (yet) supported by LaTeXML.` and add a line `\usepackage{pxfonts}`
+      - this is to avoid greater than (>) sign appears as inverted question mark.
+   - replace environments `indentExercise`, `indentCom` and commands. 
+      - for more details, see **custome environments from Sharelatex and Replacements** 
+   - add setting for `lstlisting`, for syntax highlighter
+      - see the section below **authorea code block** for more details
+   - check if exercises appear OK. 
+      -  if the article uses custom command `indentexercise`, it should be edited. 
 - **Set Github URL**: In your local repo, checkout struct_authorea branch by `git checkout struct_authorea`. Then run a script to replace `wwww.example.com/` with the github repositry URL. for example, `https://github.com/miura/mod3conversionTest2/blob/struct_authorea/`
   - script `latex_replace_dummyURL.py`
   - command example: `python latex_replace_dummyURL.py <repo>/layout.md https://github.com/miura/<repo>/... /`
@@ -151,11 +160,11 @@ This section describes procedure after you prepared a Github repo of your projec
   - The latex code for the link should look like `\textbf{sourcecode} : \href{<code URL>}{<relative path>}`
   - Automatic updating of the code depends on the latex code`\textbf{sourcecode}` detected by regular expression, so if this line is not present immediately after the clode block, updates of the code file in the Github repo will not be automatically updated by Travis CI (Fig. 1 red arrow fails).  
 - **Edit texts in authorea** for dealing with following problems.
-  - You will need some manual fix in Authorea by moving codes to outside `\begin{itemize}` and `\end{itemize}` tags. This is because Authorea automatically breaks files at code blocks, so if the original text is with a code block within lists, the list is split to three parts: the first half, the code and the second half of the list. To fix this, cut the second half of the list and paste it to the first half. The code block then appears after the list. 
-  - Figure is better be positioned between sections / subsections. Figures positioned within lists splits the list, and `\items` below becomes discontinuous from the name space of `\begin{enumerate}` or `\begin{itemize}`. This becomes error.
-     - In such cases, parts below the figure should be cut and pasted to the latex fragment above the figure.
-  - reference (`\ref`) to subfigure labels will be broken because there is no more subfigures. in those cases, edit the broken `\ref` to point to the figure label.
-  - At the moment, Authorea does not allow the use of `\ttfamily` so monospace fonts cannot be used  (which I think should be improved by Authorea developers).
+   - You will need some manual fix in Authorea by moving codes to outside `\begin{itemize}` and `\end{itemize}` tags. This is because Authorea automatically breaks files at code blocks, so if the original text is with a code block within lists, the list is split to three parts: the first half, the code and the second half of the list. To fix this, cut the second half of the list and paste it to the first half. The code block then appears after the list. 
+   - Figure is better be positioned between sections / subsections. Figures positioned within lists splits the list, and `\items` below becomes discontinuous from the name space of `\begin{enumerate}` or `\begin{itemize}`. This becomes error.
+      - In such cases, parts below the figure should be cut and pasted to the latex fragment above the figure.
+   - reference (`\ref`) to subfigure labels will be broken because there is no more subfigures. in those cases, edit the broken `\ref` to point to the figure label.
+   - At the moment, Authorea does not allow the use of `\ttfamily` so monospace fonts cannot be used  (which I think should be improved by Authorea developers).
 
 ### Step 3: Set up Travis Continuous Integration
 - Add four files in the local repo in branch `struct_authorea`, `.travis.yml`, `latex_updateGIT.py`, `preinstall.sh` and `githubpush.sh`, commit and push. 
@@ -228,24 +237,34 @@ The procedure below overlaps with the protocol explained above, but is an older 
 
 
 
-### custome environments from Sharelatex
+### custome environments from Sharelatex and Replacements
 
 some of the cusrtom environments might be needed to be changed so that they appear in Authorea properly. 
 
 #### indentexercise
 
 This environment was made for Exercises, but does not work well in Authorea. 
+
 ```latex
 \newenvironment{indentexercise}[1]
 {{\setlength{\leftmargin}{2em}}
 \textbf{Exercise \thesubsection-#1}
 ```
 
-- some specific cases apply: for module 3, exercies used subsections, and did not need to correct indent exercise. 
+It seems that `\thesubsection` is not functioning. Modify this environment by removing it - see below. 
+
+```latex
+\newenvironment{indentexercise}[1]
+{{\setlength{\leftmargin}{2em}}
+\textbf{Exercise #1}
+```
+
+- some specific cases apply: for module 3, exercies used an independent subsection, and did not need to correct the environment. 
 
 #### indentFiji
 
-This environment was created for indenting a single line menu tree, but rarely used. If you see this markup is used, just delete. 
+This environment was created for indenting a single line menu tree, but rarely used. If you see this markup is used, just delete.
+ 
 ```latex
 \newenvironment{indentFiji}
 {\begin{list}{}
@@ -254,8 +273,23 @@ This environment was created for indenting a single line menu tree, but rarely u
 }
 ```
 
+Replace this to 
+
+```latex
+\newenvironment{indentFiji}
+    {
+       \begin{tabular}{|p{0.8\textwidth}|}
+       \hline\\
+    }
+    { 
+       \\\\\hline
+       \end{tabular} 
+    }
+```
+
 #### indentCom
-commands for creating a block quoting a function reference text. 
+commands for creating a block quoting a function reference text.
+ 
 ```latex
 \newenvironment{indentCom}
 {\begin{list}{}
@@ -264,12 +298,23 @@ commands for creating a block quoting a function reference text.
 }
 ```
 
+As this does not work, replace this environment as follows. Instead of using indent, use a box surrounding the command explanation. 
+
+```latex
+\newenvironment{indentCom}
+    {
+       \begin{tabular}{|p{0.8\textwidth}|}
+       \hline\\
+    }
+    { 
+       \\\\\hline
+       \end{tabular} 
+    }
+```
+
 #### Others
- 
-- `ijmenu` this shows menu tree in monospace font. DOes not work in Authorea, so just leave it as it is. 
-- `ilcom` same function as above, but for macro functions. leave it. 
-- `tab` a convenience command for creating a tab. Leave it. 
-- `HRule` this command is a cosmetic adding a horizontal line. If it causes problem, delete. 
+
+There has been several custom commands used for BIAS text book. 
 
 ```latex
 \newcommand{\ijmenu}[1][]{\texttt{\small#1}}
@@ -277,6 +322,13 @@ commands for creating a block quoting a function reference text.
 \newcommand{\tab}[][]{\hspace*{3em}}
 \newcommand{\HRule}[][]{\rule{\linewidth}{0.5mm}}
 ```
+ 
+- `ijmenu` this shows menu tree in monospace font. As this fails in Authorea, use the following instead. 
+  - `\newcommand{\ijmenu}[1]{\textit{#1}}`
+- `ilcom` same function as above, but for macro functions. Replace with italics
+  -  `\newcommand{\ilcom}[1]{\textit{#1}}`
+- `tab` a convenience command for creating a tab. Leave it. 
+- `HRule` this command is a cosmetic adding a horizontal line. If it causes problem, delete. 
 
 ### authorea code block
 
